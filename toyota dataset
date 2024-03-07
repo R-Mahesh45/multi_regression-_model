@@ -1,0 +1,341 @@
+!pip install chardet
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import statsmodels.formula.api as smf
+import numpy as np
+import chardet
+#prompt: code to upload files
+
+from google.colab import files
+# read the file
+data = pd.read_csv('utf-8-toyots.csv')
+data.columns
+data.describe()
+data.info()
+data.head()
+data.shape
+data.columns
+Corolla<-Corolla[c("Price","Age_08_04","KM","HP","cc","Doors","Gears","Quarterly_Tax","Weight")]
+
+data_sort = data[["Price","Age_08_04","KM","HP","cc","Doors","Gears","Quarterly_Tax","Weight"]]
+data_sort
+x = data_sort[["Age_08_04","KM","HP","cc","Doors","Gears","Quarterly_Tax","Weight"]]
+y = data_sort['Price']
+# we will need sactter matrix , correlation matrix
+## pairplot, pdlplotting.scatter_matrix
+## we are going to check the is there any null values we can interprete by the info() code but we are conferming here
+data.isna().sum()   # sum of rcalculating the how many null values are there in the one column
+## in this there are no null values
+## correlation matrix
+## find correlation with dependent 'column''price'
+data_sort.corr()
+## correlation matrix
+## find correlation with independent 'columns'.
+x.corr()
+## we will visulize the data
+
+# scatter plot
+sns.set_style(style='darkgrid')
+sns.pairplot(data_sort)
+
+## i have seen high corealtion between weight and quartile tax
+## i am plotting the scatter plot for further analyze the data
+data_sort.plot.scatter(x = 'Weight', y = 'Quarterly_Tax', c = 'green')
+## i have seen high corealtion between weight and price
+## i am plotting the scatter plot for further analyze the data
+data_sort.plot.scatter(x = 'Weight', y = 'Price', c = 'orange')
+## there are so many outliers are there
+## yeah we can see increasing trend by the values
+## prepare the model building
+## ols(ordinery least method)
+model = smf.ols('Price~Age_08_04+KM+HP+cc+Doors+Gears+Quarterly_Tax+Weight', data=data_sort).fit()
+##  excess variables can be joined using + symbol
+## coefficients beta values
+model.params
+## t-values and p-values: print(model.tvalues), (model.p-values)
+print("**** t_values ****",'\n',model.tvalues, '\n', '****p-values****','\n', model.pvalues)
+## p-values of gears and quartile-tax are same
+## if the values are greater than 0.05(alpha) then they are not significant
+## in this case 'cc' and 'gear' these two wre greater than alpha values other values are significant with the
+## r square value of model
+(model.rsquared,model.rsquared_adj)
+### simple regresssion model models
+## we have to check individual p-values b/w the dependent and indepandent columns
+sml_Age_08_04 = smf.ols('Price~Age_08_04', data = data_sort).fit()
+print(sml_Age_08_04.tvalues, '\n', sml_Age_08_04.pvalues)
+These values are the results of a simple linear regression model. Let's break them down:
+
+1. **Intercept and Age_08_04 (Coefficients)**: These are the coefficients of your regression model. The Intercept (β0) is 138.907847, which is the expected mean value of 'price' when all 'age_08_04' values are 0. The coefficient for 'age_08_04' (β1) is -68.978267, which means that for each one-unit increase in 'age_08_04', the expected decrease in 'price' is approximately 68.978267 units, holding all other predictors in the model constant.
+
+2. **P-values**: The second part of your output seems to be the p-values for the coefficients. Both are 0, suggesting that the intercept and the 'age_08_04' variable are statistically significant predictors of 'price' at the 0.05 significance level. A p-value of 0.0 indicates that the corresponding predictor variable is statistically significant at the 5% level, and it has a meaningful contribution to your response variable in your linear model.
+
+Remember, these interpretations are made under the assumption that the necessary assumptions for the linear regression model are satisfied. These include linearity, independence, homoscedasticity (equal variances), and normality of residuals. If these assumptions are violated, the model's estimates and predictions may not be reliable. It's always a good practice to check these assumptions when interpreting the model.
+### simple regresssion model models
+## we have to check individual p-values b/w the dependent and indepandent columns
+sml_km = smf.ols('Price~KM', data = data_sort).fit()
+print(sml_km.tvalues, '\n', sml_km.pvalues)
+sml_HP = smf.ols('Price~HP', data = data_sort).fit()
+print(sml_HP.tvalues, '\n', sml_HP.pvalues)
+sml_cc = smf.ols('Price~cc', data = data_sort).fit()
+print(sml_cc.tvalues, '\n', sml_cc.pvalues)
+sml_Doors = smf.ols('Price~Doors', data = data_sort).fit()
+print(sml_Doors.tvalues, '\n', sml_Doors.pvalues)
+sml_Gears = smf.ols('Price~Gears', data = data_sort).fit()
+print(sml_Gears.tvalues, '\n', sml_Gears.pvalues)
+sml_Quarterly_Tax = smf.ols('Price~Quarterly_Tax', data = data_sort).fit()
+print(sml_Quarterly_Tax.tvalues, '\n', sml_Quarterly_Tax.pvalues)
+sml_Weight = smf.ols('Price~Weight', data = data_sort).fit()
+print(sml_Weight.tvalues, '\n', sml_Weight.pvalues)
+CALCULATE **VIF**
+rsq_price = smf.ols('Price~Age_08_04+KM+HP+cc+Doors+Gears+Quarterly_Tax+Weight', data=data_sort).fit().rsquared
+rsq_price = 1/(1-rsq_price)
+
+rsq_Age_08_04 = smf.ols('Age_08_04~Price+KM+HP+cc+Doors+Gears+Quarterly_Tax+Weight', data=data_sort).fit().rsquared
+rsq_Age_08_04 = 1/(1-rsq_Age_08_04)
+
+rsq_KM = smf.ols('KM~Price+HP+cc+Doors+Gears+Quarterly_Tax+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_KM = 1/(1-rsq_KM)
+
+rsq_HP = smf.ols('HP~Price+KM+cc+Doors+Gears+Quarterly_Tax+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_HP = 1/(1-rsq_HP)
+
+
+rsq_cc = smf.ols('cc~Price+KM+HP+Doors+Gears+Quarterly_Tax+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_cc = 1/(1-rsq_cc)
+
+
+rsq_Doors = smf.ols('Doors~Price+KM+HP+cc+Gears+Quarterly_Tax+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_Doors = 1/(1-rsq_Doors)
+
+
+rsq_Gears = smf.ols('Gears~Price+KM+HP+cc+Doors+Quarterly_Tax+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_Gears = 1/(1-rsq_Gears)
+
+
+rsq_Quarterly_Tax = smf.ols('Quarterly_Tax~Price+KM+HP+cc+Doors+Gears+Weight+Age_08_04', data=data_sort).fit().rsquared
+rsq_Quarterly_Tax = 1/(1-rsq_Quarterly_Tax)
+
+
+
+rsq_Weight = smf.ols('Weight~Price+KM+HP+cc+Doors+Gears+Quarterly_Tax+Age_08_04', data=data_sort).fit().rsquared
+rsq_Weight = 1/(1-rsq_Weight)
+
+
+## storing vif values in a data set
+
+d1 = {'Variables':['Price','Age_08_04','KM','HP','cc','Doors','Gears','Quarterly_Tax','Weight'], 'VIF':[rsq_price,rsq_Age_08_04,rsq_KM,rsq_HP,rsq_cc,rsq_Doors,rsq_Gears,rsq_Quarterly_Tax,rsq_Weight]}
+
+vif_frame = pd.DataFrame(d1)
+vif_frame
+data_sort.head()
+Subset selection ![Screenshot 2024-02-07 093304.png](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAVkAAABvCAYAAABGprPfAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAABEGSURBVHhe7Z0JsJbTH8dPtkJUqKRLwoiiTbKvYysaS262yJKYriWJZBtrSWliNJREci3FWKJkGcyYiFTCVYwhylUXlRvK1v//+fWc67lv73q759731vcz88z7Pvt5zvI9v/P7nfd565WXl691QgghgrBZ9CmEECIAElkhhAiIRFYIIQIikRVCiIBIZIUQIiASWSGECEhOIjt+/HjXpk2blEthYaFbtGiRLf3797fPUPz444/urrvucoceeqi75pprXHl5ebQnvyEPWaqDhQsXuuuvv9516dLFjRgxwv3555/Rno2f1atXu6FDh1ZbXqZi+vTpVpdXrlzp/vnnHzdp0iR32WWXWf0LSU3eK87cuXNdjx493HvvvRdtERtKTiJ77LHHuuLiYlseeeQRd+CBB7qBAwdWbLvxxhvdTjvtFB0dDhrYhAkT7Ptzzz3nhgwZ4rbZZhtb31RYvny5e+CBB9yee+7pXnvtNdenTx+31VZbRXtrjr///tt9/vnn7pdffom2iKrw888/u08//TRaExsTOYnsHnvsYVYTS4cOHdz222/vdtttt4ptnTp1cttuu210dDjWrFnjFi9e7A444AC3yy67uGbNmrnNN9882rtp8Ouvv7ply5a5gw46yDo28qA2WLJkiRszZkydGUlsCNSx888/340dO9btvPPO0dbq4YUXXnCzZs2K1sLeKx204alTp7rDDz882iI2FPlkhRAiIEFF9q+//nIvv/yyO/PMM83Svf3229fzL2EJed8qy+jRo91PP/0U7V0ffGRdu3Z1b731lhswYID5gtkGDF3xJRUVFdn9uB73/PLLL93atf/9ehg/Hu6OTz75xF188cXulltucb///nul7fjCuPagQYPM9/nbb7+5iRMnuhNOOMGui/WGn86TyteaaruHYfbjjz9ufjDuR16RZzxLKrge6Zg/f74766yz7Lx58+bZPlwpr7zyirvkkktsO8eNGjXK8tlDuvEzfvTRR+Zu4Zjnn38+2lsZrvf0009XpI/rvv7665Yf+EQ5l7Lgk/2+LLgf9/XbyWfKxpeDT8PHH39s1+vdu7cd5/M7Dr7m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)
+AIC      ** interperatation should be r square value should be more and aic value should low
+## Build model with
+## HP and CC
+
+import statsmodels.formula.api as smf
+## model with hp
+sml_HP = smf.ols('Price~HP+Age_08_04+KM+Doors+Gears+Quarterly_Tax+Weight', data = data_sort).fit()
+print(model.rsquared,model.aic)
+## feature which gives you high r squared value and less aic value should be kept
+
+# model built with cc
+sml_cc = smf.ols('Price~cc+Weight+KM+Doors+Gears+Quarterly_Tax+Age_08_04', data = data_sort).fit()
+print(model.rsquared,model.aic)
+above interpretation is the of two column were the same so two of the columns are participating same for result
+for the better result we can use 'ensemble methods' for better results
+Residual **Analysis**
+Test for normality of residual(Q-Q Plot)
+import statsmodels.api as sm
+sml_cc = smf.ols('Price~cc+Weight+KM+Doors+Gears+Quarterly_Tax+Age_08_04', data = data_sort).fit() ## model.resid is error
+qqplot=sm.qqplot(model.resid,line='q') ## qq plot  ## when ever we write line='q' then we get 45* line
+plt.title("Normal Q-Q plot of residual")  ## points that are away from line are outliers  ## matplotlib
+plt.show()
+## to print index of values those are outliers
+outliers = list(np.where(model.resid>5000))
+these three values are ouliers
+## Residual plot for Homoscedasticity;constant variance
+define function for standardization
+# prompt: i want to upload a image  and read code
+
+!pip install Pillow
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Read the image
+image = Image.open("/content/Screenshot 2024-02-07 093304.png")
+
+# Display the image
+plt.imshow(image)
+plt.show()
+
+outliers
+Residual plot for Homoscedasticity : constant variance
+# its a type of graph
+## function defination for dtandardization i.e z score, function name : get_standardized_values
+## z-score for standardization
+## normalization is called min max sacaling
+
+def get_stanradized_values( data_sort ):
+  return (data_sort - data_sort.mean())/data_sort.std()    ## this is z score = (xi - mean)/std.dev
+
+## xi = every point - mean divided by(/) standard deviation
+plt.figure(figsize=(10,8))
+plt.scatter(get_stanradized_values(model.fittedvalues),   ## fitted value is y hat, model.resid is error
+            get_stanradized_values(model.resid))  ## error vs fitted values
+
+plt.title('residual plot')
+plt.xlabel('Standardized fitted values i.e y-hat')
+plt.ylabel('standardized residual values')
+plt.show()
+**Residual vs Regressor**
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+# Check if the model variable is defined
+if not 'model' in globals():
+    raise ValueError("The 'model' variable is not defined.")
+data_sort.head()
+get_stanradized_values
+data_sort
+fig = plt.figure(figsize=(15,10))
+fig = sm.graphics.plot_regress_exog(model,"KM",  fig=fig)
+plt.show()
+fig = plt.figure(figsize=(15,10))
+fig = sm.graphics.plot_regress_exog(model,"Weight",  fig=fig)
+plt.show()
+fig = plt.figure(figsize=(15,10))
+fig = sm.graphics.plot_regress_exog(model,"Gears",  fig=fig)
+plt.show()
+fig = plt.figure(figsize=(15,10))
+fig = sm.graphics.plot_regress_exog(model,"Quarterly_Tax",  fig=fig)
+plt.show()
+fig = plt.figure(figsize=(15,10))
+fig = sm.graphics.plot_regress_exog(model,"Doors",  fig=fig)
+plt.show()
+Model Deletion Diagnostics
+Detecting Influencers or outliers
+## for this we are going to use **C**OOK'S **D**ISTANCE
+from statsmodels.graphics.regressionplots import influence_plot
+## this code for cooks distance
+model_influence = model.get_influence()  ## this method will return 2 values : cooks distance and p value   ## ''we have called''  get-influnce method
+(c,_) = model_influence.cooks_distance ## we dont need( C ' is cooks distance value') p value so we placed_here. that is temporary place holder (- for skip the value)
+## identify the outliers - remove the data points angain this again and again till - until dont get any outliers
+## to identify the outliers there are two methods cooks distance and leverage point
+## it will take all the columns
+## 'get_influnce method' - this will return cooks distance and p value
+
+data_sort.shape
+len(data_sort)
+## plot the influencers values using stem plot
+
+fig = plt.subplots(figsize=(20, 7))
+plt.stem(np.arange(len(data_sort)), np.round(c, 3))  ## index values of columns x axis
+plt.xlabel('Row index')
+plt.ylabel('cooks distance')
+plt.show()
+## plot the influencers values using stem plot
+
+fig = plt.subplots(figsize=(20, 7))
+plt.stem(np.arange(len(data_sort)), np.round(c))  ## index values of columns x axis
+plt.xlabel('Row index')
+plt.ylabel('cooks distance')
+plt.show()
+## index and value of influncers where c is more than 1.
+## the cooks distance is considred high if it is greater than 0.5 and extreme if it greater than 1.
+(np.argmax(c),np.max(c))  ## argmax() gives index values of max value in data set
+##  80 point is having high cooks distance  so this is so extreme value
+## High influence points
+data_sort.shape
+data_sort.shape[1]
+data_sort.shape[0]
+
+## find out what is maximun of c
+## leverage method
+k = data_sort.shape[1]   ##k is number of variables
+n = data_sort.shape[0]     ## total number of data points
+leverage_cutoff = 3*(k + 1)/n
+leverage_cutoff
+from statsmodels.graphics.regressionplots import influence_plot
+
+import matplotlib.pyplot as plt
+
+influence_plot(model, alpha=0.5)
+y=[i for i in range(-2, 8)] ## -2 to 8:10 values for printing + in red color  ## it is a list[] ## list comprehension  ## i is iteration -starts from -2 to 7
+x=[leverage_cutoff for i in range(10)]  ## 10 values for printing + in red color  ## same number of elements should be there
+plt.plot(x,y, 'r+')  ## from matplot lib ## r+ for + sign to print
+
+plt.show()
+## find the index numbers and their details
+data_sort[data_sort.index.isin([80,960,221,601])]
+data_sort.head()
+new_data = pd.read_csv('/content/utf-8-toyots.csv')
+print(new_data.columns)
+new_data.head()
+## 109, 147, 523
+data1 = new_data.drop(new_data.index[[80,109,147,221,523,601,960]], axis=0).reset_index()
+data1.shape
+data1.head()
+check_data = pd.read_csv('/content/utf-8-toyots.csv')
+check_data.shape
+drop_index = data1.drop(['index'], axis=1 )
+drop_index.head()
+drop_index.shape
+drop_index
+data_new_model = drop_index[["Price","Age_08_04","KM","HP","cc","Doors","Gears","Quarterly_Tax","Weight"]]
+data_new_model.head()
+data_new_model.shape
+Built A New Model
+all the steps we have to again   
+*** for the accuracy of the model we need to treat the outliers
+## I have to exclude the 'hp' or 'cc' and generate R-squared and AIC values
+## this model is discarding 'cc'
+final_ml = smf.ols('Price~cc+KM+Age_08_04+Doors+Gears+Quarterly_Tax+Weight', data=data_new_model).fit()
+
+final_ml.rsquared, final_ml.aic  ## comparativey little high r squared value and little low aic value
+## this model is discarding the 'CC'
+final_ml2 = smf.ols('Price~HP+KM+Age_08_04+Doors+Gears+Quarterly_Tax+Weight', data=data_new_model).fit()
+## we are getting high r-square and low aic value with 'HP' excluding the 'CC' column
+final_ml2.rsquared, final_ml2.aic
+## 109, 147, 523
+## sml_HP
+Compairing above r-square and AIC value, model 'final_ml2' with hp has high r-square and low aic value hence we can include hp  col and discard the cc column , so multi collinearity problem would be resolved
+model_influence = final_ml2.get_influence()
+(c, _) = model_influence.cooks_distance
+## find again if any data point has high influence or ouliers
+fig = plt.subplots(figsize=(20,7))
+plt.stem(np.arange(len(data_new_model)), np.round(c,3))
+plt.xlabel('Row index')
+plt.ylabel('cooks distance')
+## check index of the data points where c is more than 0.5
+(np.argmax(c), np.max(c))
+## drop 648 observation
+data_2nd = data_new_model.drop(data_new_model.index[[648]],axis=0)
+data_2nd.shape
+## no index had come
+data_2nd.head()
+## this model is discarding the 'CC'
+final_ml3 = smf.ols('Price~HP+KM+Age_08_04+Doors+Gears+Quarterly_Tax+Weight', data=data_2nd).fit()
+## we are getting high r-square and low aic value with 'HP' excluding the 'CC' column
+final_ml3.rsquared, final_ml3.aic
+model_influence2 = final_ml3.get_influence()
+(c, _) = model_influence2.cooks_distance
+## find again if any data point has high influence or ouliers
+fig = plt.subplots(figsize=(20,7))
+plt.stem(np.arange(len(data_2nd)), np.round(c,3))
+plt.xlabel('Row index')
+plt.ylabel('cooks distance')
+## check index of the data points where c is more than 0.5
+(np.argmax(c), np.max(c))
+the above value coming under 0.1 so we are not doing any thing with them  beacuse the value is < 1
+## check the accurecy of the model
+final_ml3 = smf.ols('Price~HP+KM+Age_08_04+Doors+Gears+Quarterly_Tax+Weight', data=data_2nd).fit()
+## first 0.8637 was our accurecy now we are having 0.8796
+ (final_ml3.rsquared, final_ml3.aic)
+data_2nd.tail()
+**S**o **w**e **c**an **n**ow **m**ake **p**redction **m**odel
+*Predicting for new data*
+## new data for predction - what will be the price ?
+new_df = pd.DataFrame({'Age_08_04':78, 'KM':1000, 'HP':120, 'Doors':5, 'Gears':5, 'Quarterly_Tax':20, 'Weight':1200}, index=["index 1"])
+new_df
+final_ml3.predict(new_df)
