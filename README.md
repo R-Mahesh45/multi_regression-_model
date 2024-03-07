@@ -1,2 +1,2 @@
 # multi_regression-_model
-tried all the reg_models 
+done model for toyota data set
