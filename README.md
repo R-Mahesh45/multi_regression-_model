@@ -1,6 +1,4 @@
 # multi_regression-_model
-done model for toyota data set
-and 
-for a startup data i got so i have to build the a model for startup data
+done prediction model for toyota and startup dataset
 
 load data - EDA - OLS - VIF - Standardization - EDA2 ( cooks distance , Q-Q plot, leverage) - OLS- Predict values
